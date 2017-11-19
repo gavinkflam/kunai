@@ -9,13 +9,17 @@ import (
 
 func transformImage(image *bimg.Image, options *Options) ([]byte, error) {
   // Delegate to fit transform
-  _, err := fitTransform(image, options)
+  _, err := fitTransforms(image, options)
+  if err != nil { return nil, err }
+
+  // Delegate to format transforms
+  _, err = formatTransforms(image, options)
   if err != nil { return nil, err }
 
   return image.Image(), err
 }
 
-func fitTransform(image *bimg.Image, options *Options) ([]byte, error) {
+func fitTransforms(image *bimg.Image, options *Options) ([]byte, error) {
   if options.Fit == "clip" {
     return clipTransform(image, options)
   } else if options.Fit == "crop" {
@@ -23,6 +27,14 @@ func fitTransform(image *bimg.Image, options *Options) ([]byte, error) {
   }
 
   return nil, fmt.Errorf("fit %s not supported", options.Fit)
+}
+
+func formatTransforms(image *bimg.Image, options *Options) ([]byte, error) {
+  // Apply output format transform
+  _, err := formatTransform(image, options)
+  if err != nil { return nil, err }
+
+  return image.Image(), nil
 }
 
 func clipTransform(image *bimg.Image, options *Options) ([]byte, error) {
@@ -52,6 +64,19 @@ func cropTransform(image *bimg.Image, options *Options) ([]byte, error) {
     return image.ResizeAndCrop(options.Width, options.Height)
   }
   return nil, errors.New("both width and height are required for crop")
+}
+
+func formatTransform(image *bimg.Image, options *Options) ([]byte, error) {
+  if len(options.Format) == 0 {
+    // Do nothing if output format was not supplied
+    return image.Image(), nil
+  }
+
+  // Convert format to image type and apply
+  imageType, err := formatToImageType(options.Format)
+  if err != nil { return nil, err }
+
+  return image.Convert(imageType)
 }
 
 func calcNewSize(image *bimg.Image, width, height int) (int, int, error) {
@@ -92,4 +117,19 @@ func aspectRatio(image *bimg.Image) (float64, error) {
   if err != nil { return 0, err }
 
   return float64(size.Width) / float64(size.Height), nil
+}
+
+func formatToImageType(fm string) (bimg.ImageType, error) {
+  switch fm {
+  case "png":
+    return bimg.PNG, nil
+  case "jpg":
+    return bimg.JPEG, nil
+  case "webp":
+    return bimg.WEBP, nil
+  case "gif":
+    return bimg.GIF, nil
+  default:
+    return bimg.UNKNOWN, fmt.Errorf("format %s not supported", fm)
+  }
 }
