@@ -13,11 +13,12 @@ func RegisterImagesApis(router *gin.RouterGroup) {
 
 func ProcessImage(c *gin.Context) {
   filename := c.Param("filename")
-  tmpFileName, err := core.Process(filename)
 
-  if err != nil {
-    c.String(500, err.Error())
-  }
+  options, err := core.ParseOptions(c.Query)
+  internalErrorIfAny(c, err)
+
+  tmpFileName, err := core.Process(filename, options)
+  internalErrorIfAny(c, err)
 
   c.File(tmpFileName)
   os.Remove(tmpFileName)

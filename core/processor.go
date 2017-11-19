@@ -9,19 +9,25 @@ import (
 
 const tmpFilePrefix = "kunai"
 
-func Process(filename string) (string, error) {
-  fullFilename := FullAssetPath(filename)
+func Process(filename string, options *Options) (string, error) {
+  filePath := FullAssetPath(filename)
 
-  buffer, err := bimg.Read(fullFilename)
+  // Read image buffer from file path
+  buffer, err := bimg.Read(filePath)
   if err != nil { return "", err }
 
-  newImage, err := bimg.NewImage(buffer).Convert(bimg.PNG)
-  if err != nil { return "", err }
+  // Construct image DSL object
+  image := bimg.NewImage(buffer)
 
+  // Transform image with the options
+  resultImage, err := transformImage(image, options)
+
+  // Create a temporary file
   tmpFile, err := ioutil.TempFile(os.TempDir(), tmpFilePrefix)
   if err != nil { return "", err }
 
-  err = bimg.Write(tmpFile.Name(), newImage)
+  // Write to temporary file
+  err = bimg.Write(tmpFile.Name(), resultImage)
   if err != nil { return "", err }
 
   return tmpFile.Name(), nil
