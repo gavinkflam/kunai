@@ -4,6 +4,7 @@ import (
   "log"
   "os"
 
+  "github.com/gavinkflam/kunai/apis"
   "github.com/gavinkflam/kunai/configs"
   "github.com/gin-gonic/gin"
 )
@@ -16,9 +17,7 @@ func main() {
   router := gin.Default()
 
   // Endpoint for images processing
-  router.GET("/images/:signature/:pipe_args/:filename", func(c *gin.Context) {
-    c.String(200, "It works!")
-  })
+  apis.RegisterImagesApis(router.Group("/images"))
 
   // Use logger middleware
   router.Use(gin.Logger())
