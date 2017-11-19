@@ -8,43 +8,69 @@ import (
 )
 
 func transformImage(image *bimg.Image, options *Options) ([]byte, error) {
-  var rImage []byte
-  var err    error
+  // Delegate to fit transform
+  _, err := fitTransform(image, options)
+  if err != nil { return nil, err }
 
-  // Delegate to fit transforms
+  return image.Image(), err
+}
+
+func fitTransform(image *bimg.Image, options *Options) ([]byte, error) {
   if options.Fit == "clip" {
-    rImage, err = clipTransform(image, options)
+    return clipTransform(image, options)
   } else if options.Fit == "crop" {
-    rImage, err = cropTransform(image, options)
-  } else {
-    return nil, fmt.Errorf("fit %s not supported", options.Fit)
+    return cropTransform(image, options)
   }
 
-  return rImage, err
+  return nil, fmt.Errorf("fit %s not supported", options.Fit)
 }
 
 func clipTransform(image *bimg.Image, options *Options) ([]byte, error) {
+  var err error
+  w, h := options.Width, options.Height
+
   if options.Width > 0 && options.Height > 0 {
-    return image.Resize(options.Width, options.Height)
+    // Calculate size to fit within the bound without cropping or distorting
+    w, h, err = calcNewSize(image, w, h)
   } else if options.Width > 0 {
-    height, err := calcNewHeight(image, options.Width)
-
-    if err != nil { return nil, err }
-    return image.Resize(options.Width, height)
+    // Calculate auto height to matain aspeect ratio
+    h, err = calcNewHeight(image, options.Width)
+  } else if options.Height > 0 {
+    // Calculate auto width to matain aspeect ratio
+    w, err = calcNewWidth(image, options.Height)
   } else {
-    width, err := calcNewWidth(image, options.Height)
-
-    if err != nil { return nil, err }
-    return image.Resize(width, options.Height)
+    // Do nothing if no height or width were provided
+    return image.Image(), nil
   }
+
+  if err != nil { return nil, err }
+  return image.Resize(w, h)
 }
 
 func cropTransform(image *bimg.Image, options *Options) ([]byte, error) {
   if options.Width > 0 && options.Height > 0 {
     return image.ResizeAndCrop(options.Width, options.Height)
-  } else {
-    return nil, errors.New("both width and height are required for crop")
   }
+  return nil, errors.New("both width and height are required for crop")
+}
+
+func calcNewSize(image *bimg.Image, width, height int) (int, int, error) {
+  ratio, err := aspectRatio(image)
+  if err != nil { return 0, 0, err }
+
+  // Calculate requested ratio to compare with image aspect ratio
+  w, h     := width, height
+  reqRatio := float64(width) / float64(height)
+
+  if reqRatio < ratio {
+    // Calculate new height as provided height is too large
+    h = int(ratio / float64(width))
+  } else if reqRatio > ratio {
+    // Calculate new height as provided width is too large
+    w = int(ratio * float64(height))
+  }
+
+  return w, h, nil
 }
 
 func calcNewWidth(image *bimg.Image, height int) (int, error) {
