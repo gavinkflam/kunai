@@ -5,9 +5,13 @@ import (
 )
 
 type Options struct {
+  // Size options
   Fit    string
   Width  int
   Height int
+
+  // Format options
+  Format string
 }
 
 type fString func(string) string
@@ -18,14 +22,18 @@ func ParseOptions(p fString) (*Options, error) {
   // Capture fit option and fallback to clip
   o.Fit = elemString(p, "fit", "clip")
 
-  // Capture width and height options
+  // Capture width option
   width, err := strconv.Atoi(elemString(p, "w", "0"))
   if err != nil { return nil, err }
   o.Width = width
 
+  // Capture height option
   height, err := strconv.Atoi(elemString(p, "h", "0"))
   if err != nil { return nil, err }
   o.Height = height
+
+  // Capture format option
+  o.Format = p("fm")
 
   return o, nil
 }
