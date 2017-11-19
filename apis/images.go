@@ -5,7 +5,7 @@ import (
 )
 
 func RegisterImagesApis(router *gin.RouterGroup) {
-  router.GET("/:signature/:pipe_args/:filename", ProcessImage)
+  router.GET("/*filename", ProcessImage)
 }
 
 func ProcessImage(c *gin.Context) {

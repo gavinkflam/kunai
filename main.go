@@ -17,7 +17,7 @@ func main() {
   router := gin.Default()
 
   // Endpoint for images processing
-  apis.RegisterImagesApis(router.Group("/images"))
+  apis.RegisterImagesApis(router.Group("/"))
 
   // Use logger middleware
   router.Use(gin.Logger())
