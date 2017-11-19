@@ -1,3 +1,6 @@
 [[constraint]]
   name = "github.com/gin-gonic/gin"
   version = "1.2"
+[[constraint]]
+  name = "github.com/h2non/bimg"
+  version = "1.0.17"
