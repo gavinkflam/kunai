@@ -5,6 +5,10 @@ import (
   "strconv"
 )
 
+func DirStr() string {
+  return getenv("DIR", "/mnt/assets")
+}
+
 func Port() int {
   port, _ := strconv.Atoi(PortStr())
   return port
