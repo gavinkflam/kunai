@@ -3,7 +3,12 @@
 
 FROM golang:1.9.2-alpine3.6 as builder
 
+# Derived from PyYoshi/alpine-libvips
+# https://github.com/PyYoshi/alpine-libvips/blob/master/Dockerfile
+
 WORKDIR /tmp
+
+# libvips version
 ENV \
   LIBVIPS_VERSION_MAJOR=8 \
   LIBVIPS_VERSION_MINOR=5 \
@@ -11,13 +16,15 @@ ENV \
 
 RUN \
   apk add --no-cache --virtual .build-deps \
+    # Used for download and extract libvips source tarball
+    curl tar \
+    # Dependencies required to build libvips
     gcc g++ make libc-dev \
-    curl \
     automake \
     libtool \
-    tar \
     gettext && \
 
+  # Development files to build vips
   apk add --no-cache --virtual .libdev-deps \
     glib-dev \
     expat-dev \
@@ -27,19 +34,24 @@ RUN \
     libxml2-dev \
     libjpeg-turbo-dev && \
 
+  # libvips version string
   LIBVIPS_VERSION=${LIBVIPS_VERSION_MAJOR}.${LIBVIPS_VERSION_MINOR}.${LIBVIPS_VERSION_PATCH} && \
 
+  # Download and extract source tarball
   curl -sL https://github.com/jcupitt/libvips/releases/download/v${LIBVIPS_VERSION}/vips-${LIBVIPS_VERSION}.tar.gz | tar -zxv && \
   cd vips-${LIBVIPS_VERSION} && \
 
+  # Build libvips from source
   ./configure --without-python --without-gsf && \
   make -j4 && \
   make install && \
 
+  # Remove caches and temporary files
   rm -rf /tmp/vips-* && \
   rm -rf /var/cache/apk/* && \
   rm -rf /tmp/vips-*
 
+# Specify locations of development files
 ENV \
   CPATH=/usr/local/include \
   LIBRARY_PATH=/usr/local/lib \
@@ -49,15 +61,22 @@ ENV \
 WORKDIR /go/src/github.com/gavinkflam/kunai
 COPY . .
 
+# Build kunai
 RUN \
   go build \
-    -i -a -tags netgo \
-    -installsuffix netgo \
-    -ldflags='-s -w' \
+    # Install dependencies
+    -i \
+    # Force rebuild
+    -a \
+    # Go tool link arguments
+    -ldflags=' \
+      # Strip debug information to reduce size
+      -s -w' \
+    # Output
     -o kunai
 
 ############################################################
-# Stage 2: assemble production image
+# Stage 2: Assemble production image
 FROM alpine:3.6
 
 MAINTAINER Gavin Lam <me@gavin.hk>
@@ -69,7 +88,7 @@ ENV \
   LANG=en_US.UTF-8 \
   HOME=/opt/app/ \
   PATH="/opt/app/bin:${PATH}" \
-  # Runtime variables
+  # libvips development files
   LIBRARY_PATH=/usr/local/lib \
   # Application variables
   GIN_MODE=release \
@@ -77,6 +96,7 @@ ENV \
   PORT=8080 \
   SECRET_KEY=CHANGEME
 
+# Runtime dependencies for libvips
 RUN \
   apk add --no-cache --virtual .run-deps \
     glib \
@@ -93,13 +113,13 @@ WORKDIR ${HOME}
 # Expose port
 EXPOSE ${PORT}
 
-# Mount directory to serve
+# Mount assets to serve
 VOLUME ${DIR}
 
 # Copy libvips
 COPY --from=builder /usr/local/lib /usr/local/lib
 
-# Copy release files
+# Copy kunai binary
 COPY --from=builder /go/src/github.com/gavinkflam/kunai/kunai /opt/app/bin/kunai
 
 # Set startup command
