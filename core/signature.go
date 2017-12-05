@@ -3,11 +3,18 @@ package core
 import (
   "crypto/md5"
   "encoding/hex"
+  "errors"
   "regexp"
 )
 
-func CheckSignature(url, token string, option Options) bool {
-  return option.Signature == deriveSignature(url, token)
+func CheckSignature(host, path, token string, option *Options) error {
+  if len(option.Signature) == 0 {
+    return errors.New("signature is required")
+  }
+  if option.Signature != deriveSignature(host + path, token) {
+    return errors.New("signature does not match") }
+
+  return nil
 }
 
 func deriveSignature(url, token string) string {
