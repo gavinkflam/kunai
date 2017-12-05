@@ -12,6 +12,9 @@ type Options struct {
 
   // Format options
   Format string
+
+  // Signature options
+  Signature string
 }
 
 type fString func(string) string
@@ -34,6 +37,9 @@ func ParseOptions(p fString) (*Options, error) {
 
   // Capture format option
   o.Format = p("fm")
+
+  // Capture signature option
+  o.Signature = p("s")
 
   return o, nil
 }
