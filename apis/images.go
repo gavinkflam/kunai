@@ -4,6 +4,7 @@ import (
   "os"
 
   "github.com/gavinkflam/kunai/core"
+  "github.com/gavinkflam/kunai/configs"
   "github.com/gin-gonic/gin"
 )
 
@@ -16,6 +17,12 @@ func ProcessImage(c *gin.Context) {
 
   options, err := core.ParseOptions(c.Query)
   internalErrorIfAny(c, err)
+
+  if configs.SignatureRequired() {
+    err := core.CheckSignature(
+      configs.HostStr(), c.Request.RequestURI, configs.Token(), options)
+    internalErrorIfAny(c, err)
+  }
 
   tmpFileName, err := core.Process(filename, options)
   internalErrorIfAny(c, err)
