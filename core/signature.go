@@ -18,8 +18,9 @@ func CheckSignature(host, path, token string, option *Options) error {
 }
 
 func deriveSignature(url, token string) string {
+  shreddedUrl := shredSignatureFromUrl(url)
   hasher := md5.New()
-  hasher.Write([]byte(token + url))
+  hasher.Write([]byte(token + shreddedUrl))
   return hex.EncodeToString(hasher.Sum(nil))
 }
 
