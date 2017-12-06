@@ -83,7 +83,7 @@ MAINTAINER Gavin Lam <me@gavin.hk>
 
 # Environment vairables
 ENV \
-  REFRESHED_AT=2017-11-20 \
+  REFRESHED_AT=2017-12-06 \
   # System variables
   LANG=en_US.UTF-8 \
   HOME=/opt/app/ \
@@ -93,8 +93,10 @@ ENV \
   # Application variables
   GIN_MODE=release \
   DIR=/mnt/assets \
+  HOST=http://localhost \
   PORT=8080 \
-  SECRET_KEY=CHANGEME
+  SECRET_KEY=CHANGEME \
+  TOKEN=
 
 # Runtime dependencies for libvips
 RUN \
