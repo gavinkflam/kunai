@@ -16,16 +16,16 @@ func ProcessImage(c *gin.Context) {
   filename := c.Param("filename")
 
   options, err := core.ParseOptions(c.Query)
-  internalErrorIfAny(c, err)
+  if abortWithError(c, err) { return }
 
   if configs.SignatureRequired() {
     err := core.CheckSignature(
       configs.HostStr(), c.Request.RequestURI, configs.Token(), options)
-    internalErrorIfAny(c, err)
+    if abortWithError(c, err) { return }
   }
 
   tmpFileName, err := core.Process(filename, options)
-  internalErrorIfAny(c, err)
+  if abortWithError(c, err) { return }
 
   c.File(tmpFileName)
   os.Remove(tmpFileName)
