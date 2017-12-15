@@ -7,11 +7,11 @@ import (
   "regexp"
 )
 
-func CheckSignature(host, path, token string, option *Options) error {
+func CheckSignature(path, token string, option *Options) error {
   if len(option.Signature) == 0 {
     return errors.New("signature is required")
   }
-  if option.Signature != deriveSignature(host + path, token) {
+  if option.Signature != deriveSignature(path, token) {
     return errors.New("signature does not match") }
 
   return nil

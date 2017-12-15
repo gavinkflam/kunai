@@ -20,7 +20,7 @@ func ProcessImage(c *gin.Context) {
 
   if configs.SignatureRequired() {
     err := core.CheckSignature(
-      configs.HostStr(), c.Request.RequestURI, configs.Token(), options)
+      c.Request.RequestURI, configs.Token(), options)
     if abortWithError(c, err) { return }
   }
 
