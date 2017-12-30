@@ -5,6 +5,19 @@ import (
   "strconv"
 )
 
+func CacheExpSec() int {
+  cacheExpSec, _ := strconv.Atoi(CacheExpSecStr())
+  return cacheExpSec
+}
+
+func CacheExpSecStr() string {
+  return getenv("CACHE_EXP_SEC", "0")
+}
+
+func CacheDirective() string {
+  return getenv("CACHE_DIRECTIVE", "public")
+}
+
 func DirStr() string {
   return getenv("DIR", "/mnt/assets")
 }

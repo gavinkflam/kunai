@@ -27,6 +27,14 @@ func ProcessImage(c *gin.Context) {
   tmpFileName, err := core.Process(filename, options)
   if abortWithError(c, err) { return }
 
+  c.Header("Cache-Control", cacheControlStr())
+
   c.File(tmpFileName)
   os.Remove(tmpFileName)
+}
+
+func cacheControlStr() string {
+  return "max-age=" +
+    configs.CacheExpSecStr() + ", " +
+    configs.CacheDirective()
 }
