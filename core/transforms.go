@@ -8,15 +8,30 @@ import (
 )
 
 func transformImage(image *bimg.Image, options *Options) ([]byte, error) {
+  var err error
+
   // Delegate to fit transform
-  _, err := fitTransforms(image, options)
+  _, err = fitTransforms(image, options)
   if err != nil { return nil, err }
 
   // Delegate to format transforms
   _, err = formatTransforms(image, options)
   if err != nil { return nil, err }
 
-  return image.Image(), err
+  // Delegate to auto transform
+  _, err = autoTransforms(image, options)
+  if err != nil { return nil, err }
+
+  return image.Image(), nil
+}
+
+func autoTransforms(image *bimg.Image, options *Options) ([]byte, error) {
+  if options.Auto == "compress" {
+    _, err := compressTransform(image)
+    if err != nil { return nil, err }
+  }
+
+  return image.Image(), nil
 }
 
 func fitTransforms(image *bimg.Image, options *Options) ([]byte, error) {
@@ -35,6 +50,16 @@ func formatTransforms(image *bimg.Image, options *Options) ([]byte, error) {
   if err != nil { return nil, err }
 
   return image.Image(), nil
+}
+
+func compressTransform(image *bimg.Image) ([]byte, error) {
+  // Compress with quality of 45 and strip metadata
+  imageOptions := bimg.Options{
+    Quality:       45,
+    StripMetadata: true,
+  }
+
+  return image.Process(imageOptions)
 }
 
 func clipTransform(image *bimg.Image, options *Options) ([]byte, error) {

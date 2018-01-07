@@ -5,6 +5,9 @@ import (
 )
 
 type Options struct {
+  // Automatic
+  Auto   string
+
   // Size options
   Fit    string
   Width  int
@@ -21,6 +24,9 @@ type fString func(string) string
 
 func ParseOptions(p fString) (*Options, error) {
   o := new(Options)
+
+  // Capture auto option
+  o.Auto = elemString(p, "auto", "")
 
   // Capture fit option and fallback to clip
   o.Fit = elemString(p, "fit", "clip")
