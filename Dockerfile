@@ -1,7 +1,7 @@
 ############################################################
 # Stage 1: Build libvips and kunai within builder
 
-FROM golang:1.9.2-alpine3.6 as builder
+FROM golang:1.9.2-alpine3.7 as builder
 
 # Derived from PyYoshi/alpine-libvips
 # https://github.com/PyYoshi/alpine-libvips/blob/master/Dockerfile
@@ -77,7 +77,7 @@ RUN \
 
 ############################################################
 # Stage 2: Assemble production image
-FROM alpine:3.6
+FROM alpine:3.7
 
 MAINTAINER Gavin Lam <me@gavin.hk>
 
