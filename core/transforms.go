@@ -10,6 +10,10 @@ import (
 func transformImage(image *bimg.Image, options *Options) ([]byte, error) {
   var err error
 
+  // Delegate to builtin transform
+  _, err = builtinTransforms(image)
+  if err != nil { return nil, err }
+
   // Delegate to fit transform
   _, err = fitTransforms(image, options)
   if err != nil { return nil, err }
@@ -19,6 +23,15 @@ func transformImage(image *bimg.Image, options *Options) ([]byte, error) {
   if err != nil { return nil, err }
 
   return image.Image(), nil
+}
+
+func builtinTransforms(image *bimg.Image) ([]byte, error) {
+  // Strip metadata by default
+  processOptions := bimg.Options{
+    StripMetadata: true,
+  }
+
+  return image.Process(processOptions)
 }
 
 func fitTransforms(image *bimg.Image, options *Options) ([]byte, error) {
