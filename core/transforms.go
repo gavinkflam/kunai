@@ -105,10 +105,10 @@ func outputFormatTransform(image *bimg.Image, options *Options) ([]byte, error) 
   }
 
   // Convert format to image type and apply
-  imageType, err := formatToImageType(options.Format)
+  processOptions, err := formatToProcessOptions(options.Format)
   if err != nil { return nil, err }
 
-  return image.Convert(imageType)
+  return image.Process(processOptions)
 }
 
 func calcNewSize(image *bimg.Image, width, height int) (int, int, error) {
@@ -151,17 +151,29 @@ func aspectRatio(image *bimg.Image) (float64, error) {
   return float64(size.Width) / float64(size.Height), nil
 }
 
-func formatToImageType(fm string) (bimg.ImageType, error) {
+func formatToProcessOptions(fm string) (bimg.Options, error) {
+  var imageType bimg.ImageType
+  var interlace bool = false
+
   switch fm {
   case "png":
-    return bimg.PNG, nil
+    imageType = bimg.PNG
   case "jpg":
-    return bimg.JPEG, nil
+    imageType = bimg.JPEG
+  case "pjpg":
+    imageType = bimg.JPEG
+    interlace = true
   case "webp":
-    return bimg.WEBP, nil
+    imageType = bimg.WEBP
   case "gif":
-    return bimg.GIF, nil
+    imageType = bimg.GIF
   default:
-    return bimg.UNKNOWN, fmt.Errorf("format %s not supported", fm)
+    return bimg.Options{}, fmt.Errorf("format %s not supported", fm)
   }
+
+  processOptions := bimg.Options{
+    Type:      imageType,
+    Interlace: interlace,
+  }
+  return processOptions, nil
 }
