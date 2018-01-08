@@ -18,19 +18,6 @@ func transformImage(image *bimg.Image, options *Options) ([]byte, error) {
   _, err = formatTransforms(image, options)
   if err != nil { return nil, err }
 
-  // Delegate to auto transform
-  _, err = autoTransforms(image, options)
-  if err != nil { return nil, err }
-
-  return image.Image(), nil
-}
-
-func autoTransforms(image *bimg.Image, options *Options) ([]byte, error) {
-  if options.Auto == "compress" {
-    _, err := compressTransform(image)
-    if err != nil { return nil, err }
-  }
-
   return image.Image(), nil
 }
 
@@ -45,18 +32,21 @@ func fitTransforms(image *bimg.Image, options *Options) ([]byte, error) {
 }
 
 func formatTransforms(image *bimg.Image, options *Options) ([]byte, error) {
+  var err error
   // Apply output format transform
-  _, err := formatTransform(image, options)
+  _, err = outputFormatTransform(image, options)
+  if err != nil { return nil, err }
+
+  // Apply quality format transform
+  _, err = qualityTransform(image, options)
   if err != nil { return nil, err }
 
   return image.Image(), nil
 }
 
-func compressTransform(image *bimg.Image) ([]byte, error) {
-  // Compress with quality of 45 and strip metadata
+func qualityTransform(image *bimg.Image, options *Options) ([]byte, error) {
   imageOptions := bimg.Options{
-    Quality:       45,
-    StripMetadata: true,
+    Quality: options.Quality,
   }
 
   return image.Process(imageOptions)
@@ -91,7 +81,7 @@ func cropTransform(image *bimg.Image, options *Options) ([]byte, error) {
   return nil, errors.New("both width and height are required for crop")
 }
 
-func formatTransform(image *bimg.Image, options *Options) ([]byte, error) {
+func outputFormatTransform(image *bimg.Image, options *Options) ([]byte, error) {
   if len(options.Format) == 0 {
     // Do nothing if output format was not supplied
     return image.Image(), nil

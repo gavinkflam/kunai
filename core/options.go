@@ -5,9 +5,6 @@ import (
 )
 
 type Options struct {
-  // Automatic
-  Auto   string
-
   // Size options
   Fit    string
   Width  int
@@ -15,6 +12,7 @@ type Options struct {
 
   // Format options
   Format string
+  Quality int
 
   // Signature options
   Signature string
@@ -24,9 +22,6 @@ type fString func(string) string
 
 func ParseOptions(p fString) (*Options, error) {
   o := new(Options)
-
-  // Capture auto option
-  o.Auto = elemString(p, "auto", "")
 
   // Capture fit option and fallback to clip
   o.Fit = elemString(p, "fit", "clip")
@@ -43,6 +38,11 @@ func ParseOptions(p fString) (*Options, error) {
 
   // Capture format option
   o.Format = p("fm")
+
+  // Capture quality option
+  quality, err := strconv.Atoi(elemString(p, "q", "75"))
+  if err != nil { return nil, err }
+  o.Quality = quality
 
   // Capture signature option
   o.Signature = p("s")
