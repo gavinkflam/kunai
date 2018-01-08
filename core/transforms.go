@@ -89,7 +89,13 @@ func colorSpaceTransform(image *bimg.Image, options *Options) ([]byte, error) {
   if options.ColorSpace == "srgb" {
     return image.Colourspace(bimg.InterpretationSRGB)
   }
-  return nil, errors.New("only srgb color space is supported")
+  if options.ColorSpace == "strip" {
+    processOptions := bimg.Options{
+      NoProfile: true,
+    }
+    return image.Process(processOptions)
+  }
+  return nil, fmt.Errorf("color space %s not supported", options.ColorSpace)
 }
 
 func outputFormatTransform(image *bimg.Image, options *Options) ([]byte, error) {
