@@ -33,6 +33,10 @@ func fitTransforms(image *bimg.Image, options *Options) ([]byte, error) {
 
 func formatTransforms(image *bimg.Image, options *Options) ([]byte, error) {
   var err error
+  // Apply color space transform
+  _, err = colorSpaceTransform(image, options)
+  if err != nil { return nil, err }
+
   // Apply output format transform
   _, err = outputFormatTransform(image, options)
   if err != nil { return nil, err }
@@ -79,6 +83,13 @@ func cropTransform(image *bimg.Image, options *Options) ([]byte, error) {
     return image.ResizeAndCrop(options.Width, options.Height)
   }
   return nil, errors.New("both width and height are required for crop")
+}
+
+func colorSpaceTransform(image *bimg.Image, options *Options) ([]byte, error) {
+  if options.ColorSpace == "srgb" {
+    return image.Colourspace(bimg.InterpretationSRGB)
+  }
+  return nil, errors.New("only srgb color space is supported")
 }
 
 func outputFormatTransform(image *bimg.Image, options *Options) ([]byte, error) {

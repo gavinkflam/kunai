@@ -11,6 +11,7 @@ type Options struct {
   Height int
 
   // Format options
+  ColorSpace string
   Format string
   Quality int
 
@@ -35,6 +36,9 @@ func ParseOptions(p fString) (*Options, error) {
   height, err := strconv.Atoi(elemString(p, "h", "0"))
   if err != nil { return nil, err }
   o.Height = height
+
+  // Capture color space option, default to srgb
+  o.ColorSpace = elemString(p, "cs", "srgb")
 
   // Capture format option
   o.Format = p("fm")
