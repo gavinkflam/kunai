@@ -26,9 +26,11 @@ func transformImage(image *bimg.Image, options *Options) ([]byte, error) {
 }
 
 func builtinTransforms(image *bimg.Image) ([]byte, error) {
-  // Strip metadata by default
   processOptions := bimg.Options{
-    StripMetadata: true,
+    // Change to SRBG colorspace before othe transformations
+    Interpretation: bimg.InterpretationSRGB,
+    // Strip metadata to reduce file size
+    StripMetadata:  true,
   }
 
   return image.Process(processOptions)
