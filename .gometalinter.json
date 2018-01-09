@@ -1,0 +1,31 @@
+{
+  "Deadline": "3m",
+  "EnableGC": true,
+  "Vendor": true,
+  "WarnUnmatchedDirective": true,
+
+  "Enable": [
+    "deadcode",
+    "dupl",
+    "errcheck",
+    "gas",
+    "goconst",
+    "gocyclo",
+    "gofmt",
+    "goimports",
+    "golint",
+    "gotype",
+    "ineffassign",
+    "interfacer",
+    "lll",
+    "maligned",
+    "megacheck",
+    "misspell",
+    "nakedret",
+    "structcheck",
+    "unconvert",
+    "unparam",
+    "varcheck",
+    "vet"
+  ]
+}
